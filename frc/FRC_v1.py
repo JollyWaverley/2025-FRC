@@ -1,6 +1,7 @@
 import pandas
 from tabulate import tabulate
 from datetime import date
+import math
 
 
 def generate_statement(statement, decoration, lines):
@@ -20,7 +21,8 @@ def generate_statement(statement, decoration, lines):
         print(top_bottem)
         print(middle)
         print(top_bottem)
-        return None
+        three_lines = f"{top_bottem}\n{middle}\n{top_bottem}"
+        return three_lines
 
 
 def yes_no(question):
@@ -40,8 +42,9 @@ def instructions():
     print('''
 ====== Instructions ========
 
-Instructions go here...
+this dose math 
     ''')
+
 
 def not_blank(question):
     """checks that the user response is not blank"""
@@ -181,6 +184,75 @@ def currency(x):
     return "${:.2f}".format(x)
 
 
+def round_up(amount, round_val):
+    """Rounds amount to desired hole number"""
+    return int(math.ceil(amount / round_val)) * round_val
+
+
+def profit_goal(total_costs):
+    """calculates profit goal work out profit goal and total sales required"""
+    # initialise variables and error messages
+
+    error = "please enter a valid profit goal\n"
+
+    valid = False
+    while not valid:
+
+        # ask for profit goal...
+        response = input("What is your profit goal (eg $500 or 50%): ")
+
+        # check if first characters is $...
+        if response[0] == "$":
+            profit_type = "$"
+            # Get amount (everything after the $)
+            amount = response[1:]
+
+        # check if the last chariot is %
+        elif response[-1] == "%":
+            profit_type = "%"
+            amount = response[:-1]
+            # get mount (everything before the %)
+
+        else:
+            # set response to the amount for now
+            profit_type = "unknown"
+            amount = response
+
+        try:
+            # check amount is a number more than zero...
+            amount = float(amount)
+            if amount <= 0:
+                print(error)
+                continue
+
+        except ValueError:
+            print(error)
+            continue
+
+        if profit_type == "unknown" and amount >= 100:
+            dollar_type = yes_no(f"Do you mean $ {amount:.2f}.  ie {amount:.2f} dollars?")
+
+            # Set profit type based on your user answer above
+            if dollar_type == "yes":
+                profit_type = "$"
+            else:
+                profit_type = "%"
+
+        elif profit_type == "unknown" and amount >= 100:
+            percent_type = yes_no(f"Do you mean {amount}%? , y / n:")
+            if percent_type == "yes":
+                profit_type = "%"
+            else:
+                profit_type = "$"
+
+        # return profit goal to main routine
+        if profit_type == "$":
+            return amount
+        else:
+            goal = (amount / 100) * total_costs
+            return goal
+
+
 # Main routine starts here
 
 # initialise variables...
@@ -189,7 +261,7 @@ def currency(x):
 fixed_subtotal = 0
 fixed_panda_string = ""
 
-print(generate_statement("Fund raising Calculator", "🪙",1))
+print(generate_statement("Fund raising Calculator", "🪙", 1))
 want_instruction = yes_no("do you want to see instructions?")
 print()
 
@@ -226,13 +298,20 @@ if has_fixed == "yes":
         has_fixed = "no"
     fixed_panda_string = ""
 
-print("variable expenses: ", variable_expenses)
-print("fixed subtotal: ", fixed_subtotal)
+# print("variable expenses: ", variable_expenses)
+# print("fixed subtotal: ", fixed_subtotal)
 
 total_expenses = variable_subtotal + fixed_subtotal
 total_expenses_string = f"Total Expenses: ${total_expenses:.2f}"
 
 # Get profit Goal here.
+target = profit_goal(total_expenses)
+sales_target = total_expenses + target
+
+# it to the nearest desired dollar amount
+selling_price = (total_expenses + target) / quantity_made
+round_to = num_checker("round to: ", 'integer')
+suggested_price = round_up(selling_price, round_to)
 
 # strings / output area
 
@@ -245,27 +324,41 @@ month = today.strftime("%m")
 year = today.strftime("%Y")
 
 # headings / strings...
-main_heading_strings = get_expenses("Fund raising Calculator"
-                                    f"({product_name}, {day}/{month}/{year})", "=")
+main_heading_strings = generate_statement("Fund raising Calculator"
+                                          f"({product_name}, {day}/{month}/{year})", 1, "= ")
 quantity_string = f"Quantity being made: {quantity_made}"
-variable_heading_string = generate_statement("Variable", "-")
+variable_heading_string = generate_statement("Variable", "-", 1)
 variable_subtotal_string = f"Variable Expenses Subtotal: ${variable_subtotal:.2f}"
 
 # set up strings if we have fixed costs
 if has_fixed == "yes":
-    fixed_heading_string = generate_statement("Fixed Expenses", "-")
+    fixed_heading_string = generate_statement("Fixed Expenses", "-", 1)
     fixed_subtotal_string = f"Fixed expenses Subtotal: {fixed_subtotal}"
 # set fixed cost strings to blank if we don't have fixed costs
 else:
-    fixed_heading_string = generate_statement("You have no fixed Expenses", "-")
+    fixed_heading_string = generate_statement("You have no fixed Expenses", "-", 1)
     fixed_subtotal_string = "Fixed expenses subtotal $0.00"
+
+selling_price_heading = generate_statement("selling Price Calculations", "=", 1)
+profit_goal_string = f"profit goal: ${target:.2f}"
+sales_target_string = f"\nTotal Sales needed: ${sales_target:.2f}"
+
+minimum_price_string = f"Minimum selling Price: ${selling_price:.2f}"
+suggested_price_string = generate_statement(f"Suggested selling price :  "
+                                            f"${suggested_price:.2f}", "*", 1)
 
 # List of strings to be outputted / written to ile
 to_write = [main_heading_strings, quantity_string,
             "\n", variable_heading_string, variable_panda_string,
             variable_subtotal_string,
             "\n", fixed_heading_string, fixed_panda_string,
-            fixed_subtotal_string, total_expenses_string]
+            fixed_subtotal_string, total_expenses_string,
+            profit_goal_string, sales_target_string,
+            ]
+
+print()
+print("quantity string", quantity_string)
+print("main heading", main_heading_strings)
 
 # Print area
 print()
@@ -276,9 +369,9 @@ for item in to_write:
 file_name = f"{product_name}_{year}_{month}_{day}"
 write_to = "{}.txt".format(file_name)
 
-text_file = open(write_to, "W+")
+text_file = open(write_to, "w+")
 
-# write the item item to file
+# write the item to file
 for item in to_write:
     text_file.write(item)
     text_file.write("\n")

@@ -1,0 +1,22 @@
+44
+3 Fund raising Calculator(lkj, 09/05/2025) 3
+44
+Quantity being made: 100
+
+
+--- Variable ---
++--------+----------+------------+---------+
+| Item   | Amount   | $ / item   | Cost    |
+|--------+----------+------------+---------|
+| mlkj   | $100.00  | $1.00      | $100.00 |
++--------+----------+------------+---------+
+Variable Expenses Subtotal: $100.00
+
+
+--- Fixed Expenses ---
+
+Fixed expenses Subtotal: 20.0
+Total Expenses: $120.00
+profit goal: $500.00
+
+Total Sales needed: $620.00

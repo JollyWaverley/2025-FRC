@@ -2,7 +2,6 @@ import pandas
 from tabulate import tabulate
 
 
-
 def not_blank(question):
     """checks that the user response is not blank"""
 
